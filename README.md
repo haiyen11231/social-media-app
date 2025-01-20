@@ -1,6 +1,6 @@
 # Social Media Webapp
 
-## 1. High level design
+## 1. System Architecture Diagram
 
 ![alt text](image.png)
 
