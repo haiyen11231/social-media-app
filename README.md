@@ -2,7 +2,7 @@
 
 ## 1. System Architecture Diagram
 
-![alt text](image.png)
+![High Level Design](assets/image.png)
 
 ## 2. Functional Requirements
 
