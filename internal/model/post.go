@@ -5,9 +5,9 @@ import "time"
 // DB Model
 type Post struct {
 	ID               uint
+	UserID           uint
 	ContentText      string
 	ContentImagePath string
-	UserID           uint
 	Visible          bool
 	Comments         []*Comment
 	LikedUsers       []*User

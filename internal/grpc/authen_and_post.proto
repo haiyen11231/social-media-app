@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package authen_and_post_service;
+
+option go_package = "/internal/grpc/pb/authen_and_post";
+
+service AuthenticateAndPost {
+    rpc SignUp (SignUpRequest) returns (SignUpResponse);
+    rpc LogIn (LogInRequest) returns (LogInResponse);
+    rpc EditUser (EditUserRequest) returns (EditUserResponse); //auth
+    rpc AuthenticateUser (AuthenticateUserRequest) returns (AuthenticateUserResponse);
+    rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
+
+    rpc FollowUser (FollowUserRequest) returns (FollowUserResponse);
+    rpc UnfollowUser (UnfollowUserRequest) returns (UnfollowUserResponse);
+    rpc GetFollowerList (GetFollowerListRequest) returns (GetFollowerListResponse); //auth
+    
+    rpc CreatePost (CreatePostRequest) returns (CreatePostResponse);
+    rpc GetPost (GetPostRequest) returns (GetPostResponse);
+    rpc EditPost (EditPostRequest) returns (EditPostResponse);
+    rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
+
+    rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
+    rpc LikePost (LikePostRequest) returns (LikePostResponse);
+    // create more APIs
+}
+
+// SignUp
+message SignUpRequest {
+    string first_name = 1;
+    string last_name = 2;
+    google.protobuf.Timestamp dob = 3;
+    string email = 4;
+    string username = 5;
+    string password = 6;
+}
+
+message SignUpResponse {
+    string message = 1;
+}
+
+// LogIn
+
+message LogInRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LogInResponse {
+    uint64 user_id = 1;
+    string message = 2;
+    string access_token = 3;
+    string refresh_token = 4;
+}
+
+// EditUser
+message EditUserRequest {
+    uint64 user_id = 1;
+    optional string first_name = 2;
+    optional string last_name = 3;
+    optional google.protobuf.Timestamp dob = 4;
+    optional string password = 5;
+}
+
+message EditUserResponse {
+    string message = 1;
+}
+
+// AuthenticateUser
+message AuthenticateUserRequest {
+    string token = 1;
+}
+
+message AuthenticateUserResponse {
+    bool is_valid = 1;
+    string message = 2;
+    uint64 user_id = 3;
+}
+
+//  RefreshToken
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+    string access_token = 1;
+}
+
+// FollowUser
+message FollowUserRequest {
+    uint64 user_id = 1;
+    uint64 following_id = 2;
+}
+
+message FollowUserResponse {
+    string message = 1;
+}
+
+// UnfollowUser
+message UnfollowUserRequest {
+    uint64 user_id = 1;
+    uint64 following_id = 2;
+}
+
+message UnfollowUserResponse {
+    string message = 1;
+}
+
+// GetFollowerList
+message GetFollowerListRequest {
+    uint64 user_id = 1;
+}
+
+message GetFollowerListResponse {
+    string message = 1;
+
+    message FollowerInfo {
+        uint64 user_id = 1;
+        string first_name = 2;
+        string last_name = 3;
+        string username = 4;
+    }
+    repeated FollowerInfo followers = 2;
+}
+
+message Post {
+    uint64 post_id = 1;
+    uint64 user_id = 2;
+    string content_text = 3;
+	string content_image_path = 4;
+	bool visible = 5;
+    google.protobuf.Timestamp created_time = 6;
+}
+
+// CreatePost
+message CreatePostRequest {
+    uint64 user_id = 1;
+    string content_text = 2;
+	string content_image_path = 3;
+	bool visible = 4;
+}
+
+message CreatePostResponse {
+    string message = 1;
+    uint64 post_id = 2;
+}
+
+// GetPost 
+message GetPostRequest {
+    uint64 post_id = 1;
+}
+
+message GetPostResponse {
+    string message = 1;
+    Post post = 2;
+}
+
+// EditPost 
+message EditPostRequest {
+    uint64 post_id = 1;
+    uint64 user_id = 2;
+    optional string content_text = 3;
+	optional string content_image_path = 4;
+	optional bool visible = 5;
+}
+
+message EditPostResponse {
+    string message = 1;
+}
+
+// DeletePost
+message DeletePostRequest {
+    uint64 post_id = 1;
+    uint64 user_id = 2;
+}
+
+message DeletePostResponse {
+    string message = 1;
+}
+
+// CreateComment  
+message CreateCommentRequest {
+    uint64 user_id = 1;
+    uint64 post_id = 2;
+    string content_text = 3;
+}
+
+message CreateCommentResponse {
+    string message = 1;
+    uint64 comment_id = 2;
+}
+
+// LikePost 
+message LikePostRequest {
+    uint64 user_id = 1;
+    uint64 post_id = 2;
+}
+
+message LikePostResponse {
+    string message = 1;
+}

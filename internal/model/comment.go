@@ -3,9 +3,9 @@ package model
 // DB Model
 type Comment struct {
 	ID          uint
-	ContentText string
 	UserID      uint
 	PostID      uint
+	ContentText string
 }
 
 // Request Models

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package newsfeed_service;
+
+option go_package = "/internal/grpc/pb/newsfeed";
+
+service Newsfeed {
+    rpc GetNewsfeed (GetNewsfeedRequest) returns (GetNewsfeedResponse);
+}
+
+message GetNewsfeedRequest {
+    uint64 user_id = 1;
+}
+
+message GetNewsfeedResponse {
+    repeated uint64 post_ids = 1;
+}
