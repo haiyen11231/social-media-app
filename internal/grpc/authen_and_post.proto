@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package authen_and_post_service;
 
 option go_package = "/internal/grpc/pb/authen_and_post";
