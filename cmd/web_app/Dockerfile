@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
     go mod download
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go buil -o web_app.linux -mod=mod cmd/web_app/main.go
+    go build -o web_app.linux -mod=mod cmd/web_app/main.go
 CMD ["/app/web_app.linux"]
 
 FROM builder AS test_env
