@@ -29,3 +29,9 @@ down_migration:
 		--network host migrate/migrate \
 		-path=/db/migrations \
 		-database "mysql://root:mysql-db@tcp(localhost:3307)/social_media_app_db" down
+
+compose_up_rebuild:
+	docker compose up --build --force-recreate
+	
+compose_up:
+	docker compose up
