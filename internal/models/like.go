@@ -1,4 +1,4 @@
-package model
+package models
 
 // DB Model
 type Like struct {

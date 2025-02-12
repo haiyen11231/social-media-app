@@ -29,6 +29,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     networks:
       - intranet
     hostname: aap
@@ -47,6 +49,8 @@ services:
       redis:
         condition: service_healthy
       kafka:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     networks:
       - intranet
@@ -82,8 +86,8 @@ services:
   minio:
     image: minio/minio:latest
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: miniostorage
+      MINIO_ROOT_USER: minio # access key
+      MINIO_ROOT_PASSWORD: miniostorage # secret key
     ports:
       - 9000:9000
     volumes:
@@ -95,6 +99,7 @@ services:
     networks:
       - intranet
     hostname: minio
+    restart: always
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -108,17 +113,19 @@ services:
     networks:
       - intranet
     hostname: kafka
+    restart: always
 
   zookeeper:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    # ports:
-    #   - "2181:2181"
+    ports:
+      - "2181:2181"
     networks:
       - intranet
     hostname: zookeeper
+    restart: always
 
 volumes:
   mysql_data:

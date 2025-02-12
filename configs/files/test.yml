@@ -9,10 +9,9 @@ redis: &REDIS
   addr: redis:6379
 
 minio: &MINIO
-  root_user: minio
-  root_password: miniostorage
   endpoint: minio:9000
-  use_ssl: False
+  access_key: minio
+  secret_key: miniostorage
   bucket_name: media_storage
 
 kafka: &KAFKA
@@ -24,11 +23,13 @@ authen_and_post_config:
   port: 8001
   mysql: *MYSQL
   redis: *REDIS
+  minio: *MINIO
 
 newsfeed_config:
   port: 8002
   mysql: *MYSQL
   redis: *REDIS
+  minio: *MINIO
   kafka: *KAFKA
 
 webapp_config:
