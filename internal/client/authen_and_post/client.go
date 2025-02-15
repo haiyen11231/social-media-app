@@ -8,11 +8,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// CreateAuthenAndPostClient creates a gRPC client and connects to NGINX server
-func CreateAuthenAndPostClient(nginxAddr string) (authen_and_post.AuthenticateAndPostClient, error) {
-	conn, err := grpc.Dial(nginxAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+// NewClient creates a gRPC client and connects to NGINX server
+func NewClient(nginxHost string) (authen_and_post.AuthenticateAndPostClient, error) {
+	conn, err := grpc.Dial(nginxHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Printf("failed to connect to NGINX server at %s: %v", nginxAddr, err)
+		log.Printf("failed to connect to NGINX server at %s: %v", nginxHost, err)
 		return nil, err
 	}
 	defer conn.Close()
@@ -20,3 +20,6 @@ func CreateAuthenAndPostClient(nginxAddr string) (authen_and_post.AuthenticateAn
 	log.Println("gRPC client of authen_and_post service is connected to NGINX server...")
 	return authen_and_post.NewAuthenticateAndPostClient(conn), nil
 }
+
+
+// Qs: When do I need to use pointer? When to use defer?
