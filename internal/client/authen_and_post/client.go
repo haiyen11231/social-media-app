@@ -8,26 +8,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// NewClient creates a gRPC client with built-in round-robin load balancing
-func NewClient(serviceName string) (authen_and_post.AuthenticateAndPostClient, error) {
-	// Use DNS resolver to discover multiple hosts
-	conn, err := grpc.Dial(
-		"dns:///" + serviceName, // "localhost:50051" if havent used Kubernetes Headless Service
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`), // Enable client-side LB
-	)
-	// conn, err := grpc.Dial(
-	// 	"dns:///my-grpc-service.default.svc.cluster.local:50051",
-	// 	grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// )
-
+// CreateAuthenAndPostClient creates a gRPC client and connects to NGINX server
+func CreateAuthenAndPostClient(nginxAddr string) (authen_and_post.AuthenticateAndPostClient, error) {
+	conn, err := grpc.Dial(nginxAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
+		log.Printf("failed to connect to NGINX server at %s: %v", nginxAddr, err)
 		return nil, err
 	}
 	defer conn.Close()
 
-	log.Println("gRPC client of authen_and_post service connected with round-robin load balancing")
-
+	log.Println("gRPC client of authen_and_post service is connected to NGINX server...")
 	return authen_and_post.NewAuthenticateAndPostClient(conn), nil
 }
