@@ -15,16 +15,16 @@ type Post struct {
 
 // Request Models
 type CreatePostRequest struct {
-	UserID uint
-	ContentText      string
-	ContentImagePath string
-	Visible          bool
+	UserID uint `json:"user_id"`
+	ContentText      string `json:"content_text"`
+	ContentImagePath string `json:"content_image_path"`
+	Visible          bool `json:"visible"`
 }
 
 type EditPostRequest struct {
-	ContentText      string
-	ContentImagePath string
-	Visible          bool
+	ContentText      string `json:"content_text"`
+	ContentImagePath string `json:"content_image_path"`
+	Visible          bool `json:"visible"`
 }
 
 // Response Models

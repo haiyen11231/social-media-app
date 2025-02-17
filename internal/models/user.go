@@ -19,27 +19,26 @@ type User struct {
 
 // Request Models
 type LogInRequest struct {
-	Username string
-	Password string
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type SignUpRequest struct {
-	FirstName string
-	LastName    string
-	DoB string
-	Email string
-	Username string
-	Password string
+	FirstName string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	DoB string `json:"dob"`
+	Email string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
-type UpdateUserRequest struct {
-	UserID uint
-	FirstName string
-	LastName    string
-	DoB string
-	Email string
-	Username string
-	Password string
+type EditUserRequest struct {
+	FirstName string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	DoB string `json:"dob"`
+	Email string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // Response Models

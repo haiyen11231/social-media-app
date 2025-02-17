@@ -10,7 +10,7 @@ type Comment struct {
 
 // Request Models
 type CreateCommentRequest struct {
-	ContentText string
+	ContentText string `json:"content_text"`
 }
 
 // Response Models
