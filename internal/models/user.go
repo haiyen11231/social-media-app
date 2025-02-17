@@ -43,5 +43,5 @@ type EditUserRequest struct {
 
 // Response Models
 type MessageResponse struct {
-	Message string
+	Message string `json:"message"`
 }
