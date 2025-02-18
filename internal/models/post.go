@@ -22,9 +22,9 @@ type CreatePostRequest struct {
 }
 
 type EditPostRequest struct {
-	ContentText      string `json:"content_text"`
-	ContentImagePath string `json:"content_image_path"`
-	Visible          bool `json:"visible"`
+	ContentText      *string `json:"content_text"`
+	ContentImagePath *string `json:"content_image_path"`
+	Visible          *bool `json:"visible"`
 }
 
 // Response Models
@@ -34,5 +34,5 @@ type PostDetailResponse struct {
 	ContentText string `json:"content_text"`
 	ContentImagePath string `json:"content_image_path"`
 	Visible bool `json:"visible"`
-	CreatedTime time.Time `json:"created_time"`
+	CreatedAt time.Time `json:"created_at"`
 }

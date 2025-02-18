@@ -131,7 +131,7 @@ message Post {
     string content_text = 3;
 	string content_image_path = 4;
 	bool visible = 5;
-    google.protobuf.Timestamp created_time = 6;
+    google.protobuf.Timestamp created_at = 6;
 }
 
 // CreatePost
