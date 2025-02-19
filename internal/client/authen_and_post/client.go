@@ -12,7 +12,7 @@ import (
 func NewClient(nginxHost string) (authen_and_post.AuthenticateAndPostClient, error) {
 	conn, err := grpc.Dial(nginxHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Printf("failed to connect to NGINX server at %s: %v", nginxHost, err)
+		log.Printf("Failed to connect to NGINX server at %s: %v", nginxHost, err)
 		return nil, err
 	}
 	defer conn.Close()

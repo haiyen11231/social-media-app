@@ -23,18 +23,18 @@ type appConfigs struct {
 func loadAppConfigs(path string) (*appConfigs, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open config file (path: %s): %s", path, err)
+		return nil, fmt.Errorf("Failed to open config file (path: %s): %s", path, err)
 	}
 	defer file.Close()
 
 	fileContent, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file (path: %s): %s", path, err)
+		return nil, fmt.Errorf("Failed to read config file (path: %s): %s", path, err)
 	}
 	
 	config := &appConfigs{}
 	if err := yaml.Unmarshal(fileContent, config); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config file (path: %s): %s", path, err)
+		return nil, fmt.Errorf("Failed to unmarshal config file (path: %s): %s", path, err)
 	}
 
 	return config, nil
