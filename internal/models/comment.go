@@ -8,6 +8,10 @@ type Comment struct {
 	ContentText string
 }
 
+func (Comment) TableName() string {
+	return "comment"
+}
+
 // Request Models
 type CreateCommentRequest struct {
 	ContentText string `json:"content_text"`

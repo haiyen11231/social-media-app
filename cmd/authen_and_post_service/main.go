@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var path = flag.String("cfg", "config.yml", "path to config file of this service")
+var path = flag.String("cfg", "test.yml", "path to config file of this service")
 
 func main() {
 	cfg, err := configs.GetAuthenAndPostConfig(*path)

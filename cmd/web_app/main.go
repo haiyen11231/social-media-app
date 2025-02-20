@@ -10,7 +10,7 @@ import (
 	"github.com/haiyen11231/social-media-app.git/internal/app/web_app/service"
 )
 
-var path = flag.String("cfg", "config.yml", "path to config file of this service")
+var path = flag.String("cfg", "test.yml", "path to config file of this service")
 
 func main() {
 	flag.Parse()
@@ -26,8 +26,9 @@ func main() {
 		log.Fatalf("Failed to init server: %s", err)
 	}
 
-	web_app.WebController{
+	webController := &web_app.WebController{
 		WebService: *webService,
 		Port:       cfg.Port,
-	}.Run()
+	}
+	webController.Run()
 }

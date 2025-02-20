@@ -99,13 +99,13 @@ func (s *AuthenAndPostService) LogIn (ctx context.Context, request *authen_and_p
 		return &authen_and_post.LogInResponse{Message: "Incorrect password"}, nil
 	}
 
-	accessToken, err := GenerateToken(user.Id, 15*time.Minute)
+	accessToken, err := GenerateToken(uint64(user.ID), 15*time.Minute)
 	if err != nil {
 		log.Println("Failed to generate access token:", err.Error())
 		return nil, err
 	}
 
-	refreshToken, err := GenerateToken(user.Id, 24*time.Hour)
+	refreshToken, err := GenerateToken(uint64(user.ID), 24*time.Hour)
 	if err != nil {
 		log.Println("Failed to generate refresh token:", err.Error())
 		return nil, err
@@ -158,51 +158,61 @@ func (s *AuthenAndPostService) EditUser (ctx context.Context, request *authen_an
 	}, nil
 }
 
-func (s *AuthenAndPostService) AuthenticateUser (ctx context.Context, request *authen_and_post.AuthenticateUserRequest) (*authen_and_post.AuthenticateUserResponse, error) {
+// func (s *AuthenAndPostService) AuthenticateUser (ctx context.Context, request *authen_and_post.AuthenticateUserRequest) (*authen_and_post.AuthenticateUserResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) RefreshToken (ctx context.Context, request *authen_and_post.RefreshTokenRequest) (*authen_and_post.RefreshTokenResponse, error) {
+// func (s *AuthenAndPostService) RefreshToken (ctx context.Context, request *authen_and_post.RefreshTokenRequest) (*authen_and_post.RefreshTokenResponse, error) {
 
-}
+// }
 
 // Following
-func (s *AuthenAndPostService) FollowUser (ctx context.Context, request *authen_and_post.FollowUserRequest) (*authen_and_post.FollowUserResponse, error) {
+func (s *AuthenAndPostService) checkUserExisting (ctx context.Context, userId uint64) error {
+	var user models.User
+	err := s.db.Table("user").Where("id = ?", userId).First(&user).Error
+	if err != nil {
+		return errors.New("User not found")
+	}
 
+	return nil
 }
 
-func (s *AuthenAndPostService) UnfollowUser (ctx context.Context, request *authen_and_post.UnfollowUserRequest) (*authen_and_post.UnfollowUserResponse, error) {
+// func (s *AuthenAndPostService) FollowUser (ctx context.Context, request *authen_and_post.FollowUserRequest) (*authen_and_post.FollowUserResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) GetFollowerList (ctx context.Context, request *authen_and_post.GetFollowerListRequest) (*authen_and_post.GetFollowerListResponse, error) {
+// func (s *AuthenAndPostService) UnfollowUser (ctx context.Context, request *authen_and_post.UnfollowUserRequest) (*authen_and_post.UnfollowUserResponse, error) {
 
-}
+// }
 
-// Post
-func (s *AuthenAndPostService) CreatePost (ctx context.Context, request *authen_and_post.CreatePostRequest) (*authen_and_post.CreatePostResponse, error) {
+// func (s *AuthenAndPostService) GetFollowerList (ctx context.Context, request *authen_and_post.GetFollowerListRequest) (*authen_and_post.GetFollowerListResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) GetPost (ctx context.Context, request *authen_and_post.GetPostRequest) (*authen_and_post.GetPostResponse, error) {
+// // Post
+// func (s *AuthenAndPostService) CreatePost (ctx context.Context, request *authen_and_post.CreatePostRequest) (*authen_and_post.CreatePostResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) EditPost (ctx context.Context, request *authen_and_post.EditPostRequest) (*authen_and_post.EditPostResponse, error) {
+// func (s *AuthenAndPostService) GetPost (ctx context.Context, request *authen_and_post.GetPostRequest) (*authen_and_post.GetPostResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) DeletePost (ctx context.Context, request *authen_and_post.DeletePostRequest) (*authen_and_post.DeletePostResponse, error) {
+// func (s *AuthenAndPostService) EditPost (ctx context.Context, request *authen_and_post.EditPostRequest) (*authen_and_post.EditPostResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) CreateComment (ctx context.Context, request *authen_and_post.CreateCommentRequest) (*authen_and_post.CreateCommentResponse, error) {
+// func (s *AuthenAndPostService) DeletePost (ctx context.Context, request *authen_and_post.DeletePostRequest) (*authen_and_post.DeletePostResponse, error) {
 
-}
+// }
 
-func (s *AuthenAndPostService) LikePost (ctx context.Context, request *authen_and_post.LikePostRequest) (*authen_and_post.LikePostResponse, error) {
+// func (s *AuthenAndPostService) CreateComment (ctx context.Context, request *authen_and_post.CreateCommentRequest) (*authen_and_post.CreateCommentResponse, error) {
 
-}
+// }
+
+// func (s *AuthenAndPostService) LikePost (ctx context.Context, request *authen_and_post.LikePostRequest) (*authen_and_post.LikePostResponse, error) {
+
+// }
 
 func generateAlphabetSalt(length int) []byte {
 	rand.Seed(time.Now().UnixNano())

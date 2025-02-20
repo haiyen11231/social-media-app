@@ -17,6 +17,10 @@ type User struct {
 	Posts []*Post `gorm:"foreignKey:UserID"`
 }
 
+func (User) TableName() string {
+	return "user"
+}
+
 // Request Models
 type LogInRequest struct {
 	Username string `json:"username"`

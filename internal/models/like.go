@@ -5,3 +5,7 @@ type Like struct {
 	UserID uint
 	PostID uint
 }
+
+func (Like) TableName() string {
+	return "like"
+}

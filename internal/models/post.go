@@ -13,6 +13,10 @@ type Post struct {
 	LikedUsers       []*User
 }
 
+func (Post) TableName() string {
+	return "post"
+}
+
 // Request Models
 type CreatePostRequest struct {
 	UserID uint `json:"user_id"`
