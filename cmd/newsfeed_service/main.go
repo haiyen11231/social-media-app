@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var path = flag.String("cfg", "test.yml", "path to config file of this service")
+var path = flag.String("cfg", "/app/configs/files/test.yml", "path to config file of this service")
 
 func main() {
 	cfg, err := configs.GetNewsfeedConfig(*path)
@@ -33,7 +33,7 @@ func main() {
 	nsfServer := grpc.NewServer()
 	newsfeed.RegisterNewsfeedServer(nsfServer, service)
 
-	log.Printf("gRPC NSF Service server started on port %s", cfg.Port)
+	log.Printf("gRPC NSF Service server started on port %d", cfg.Port)
 	if err := nsfServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %s", err)
 	}

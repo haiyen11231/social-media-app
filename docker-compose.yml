@@ -9,9 +9,12 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - web
-      - authen_and_post
-      - newsfeed
+      web:
+        condition: service_healthy # Wait until web is healthy
+      authen_and_post:
+        condition: service_healthy
+      newsfeed:
+        condition: service_healthy
     networks:
       - intranet
     restart: unless-stopped
@@ -25,12 +28,18 @@ services:
     expose:
       - "8000"
     depends_on:
-      - authen_and_post
-      - newsfeed
+      authen_and_post:
+        condition: service_healthy
+      newsfeed:
+        condition: service_healthy
     networks:
       - intranet
     hostname: webapp
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      retries: 5
 
   authen_and_post:
     build:
@@ -51,6 +60,10 @@ services:
       - intranet
     hostname: aap
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      retries: 5
 
   newsfeed:
     build:
@@ -73,6 +86,10 @@ services:
       - intranet
     hostname: nfs
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      retries: 5
 
   mysql:
     image: mysql:latest
@@ -111,9 +128,11 @@ services:
       MINIO_ROOT_USER: minio #Access Key
       MINIO_ROOT_PASSWORD: miniostorage #Secret Key
     ports:
-      - "9000:9000"
+      - "9000:9000" # MinIO API Port
+      - "9001:9001" # MinIO Admin Console Port
     volumes:
       - minio_data:/data
+    command: ["server", "/data", "--console-address", ":9001"] # Enable Admin Console
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       timeout: 20s
@@ -122,6 +141,21 @@ services:
       - intranet
     hostname: minio
     restart: always
+
+  create_minio_bucket:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set myminio http://minio:9000 minio miniostorage;
+      /usr/bin/mc mb myminio/social-media-bucket;
+      /usr/bin/mc policy set public myminio/social-media-bucket;
+      exit 0;"
+    networks:
+      - intranet
 
   kafka:
     image: confluentinc/cp-kafka:latest

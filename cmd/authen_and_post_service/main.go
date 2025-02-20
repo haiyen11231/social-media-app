@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var path = flag.String("cfg", "test.yml", "path to config file of this service")
+var path = flag.String("cfg", "/app/configs/files/test.yml", "path to config file of this service")
 
 func main() {
 	cfg, err := configs.GetAuthenAndPostConfig(*path)
@@ -33,7 +33,7 @@ func main() {
 	aapServer := grpc.NewServer()
 	authen_and_post.RegisterAuthenticateAndPostServer(aapServer, service)
 
-	log.Printf("gRPC AAP Service server started on port %s", cfg.Port)
+	log.Printf("gRPC AAP Service server started on port %d", cfg.Port)
 	if err := aapServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %s", err)
 	}
