@@ -1,13 +1,8 @@
 package configs
 
-import (
-	"github.com/redis/go-redis/v9"
-	"gorm.io/driver/mysql"
-)
-
 type AuthenAndPostConfig struct {
-	Port  int           `yaml:"port"`
-	MySQL mysql.Config  `yaml:"mysql"`
-	Redis redis.Options `yaml:"redis"`
-	Minio MinioConfig   `yaml:"minio"`
+	Port  int         `yaml:"port"`
+	MySQL MySQLConfig `yaml:"mysql"`
+	Redis RedisConfig `yaml:"redis"`
+	Minio MinioConfig `yaml:"minio"`
 }

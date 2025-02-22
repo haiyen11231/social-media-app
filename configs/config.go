@@ -5,14 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
-	"gorm.io/driver/mysql"
 )
 
 type appConfigs struct {
-	MySQLConfig mysql.Config `yaml:"mysql"`
-	RedisConfig redis.Options `yaml:"redis"`
+	MySQLConfig MySQLConfig `yaml:"mysql"`
+	RedisConfig RedisConfig `yaml:"redis"`
 	MinioConfig *MinioConfig `yaml:"minio"`
 	KafkaConfig *KafkaConfig `yaml:"kafka"`
 	AuthenAndPostConfig *AuthenAndPostConfig `yaml:"authen_and_post_config"`

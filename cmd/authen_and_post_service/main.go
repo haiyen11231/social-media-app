@@ -37,5 +37,4 @@ func main() {
 	if err := aapServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %s", err)
 	}
-
 }

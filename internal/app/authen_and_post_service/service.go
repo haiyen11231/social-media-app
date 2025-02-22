@@ -32,28 +32,39 @@ type AuthenAndPostService struct {
 }
 
 func NewAuthenAndPostService(cfg *configs.AuthenAndPostConfig) (*AuthenAndPostService, error) {
-	db, err := gorm.Open(mysql.New(cfg.MySQL), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		DSN: cfg.MySQL.DSN,
+		DefaultStringSize: cfg.MySQL.DefaultStringSize,
+		DisableDatetimePrecision: cfg.MySQL.DisableDatetimePrecision,
+		DontSupportRenameIndex: cfg.MySQL.DontSupportRenameIndex,
+		SkipInitializeWithVersion: cfg.MySQL.SkipInitializeWithVersion,
+	}), &gorm.Config{})
 	if err != nil {
 		log.Println("Error connecting to MySQL DB: ", err)
 		return nil, err
 	}
+	log.Println("Connected to MySQL!")
 
-	rdb := redis.NewClient(&cfg.Redis)
-	if rdb != nil {
-		log.Println("Error connecting to Redis: ", err)
+	rdb := redis.NewClient(&redis.Options{
+		Addr: cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB: cfg.Redis.DB,
+	})
+	if _, err = rdb.Ping(context.Background()).Result(); err != nil {
+		log.Println("Error connecting to Redis:", err)
 		return nil, err
 	}
+	log.Println("Connected to Redis!")
 
 	minioClient, err := minio.New(cfg.Minio.Endpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(cfg.Minio.AccessKey, cfg.Minio.SecretKey, ""),
-		Secure: false,
+		Secure: cfg.Minio.UseSSL,
 	})
 	if err != nil {
-		log.Println("Error connecting to Minio: ", err)
+		log.Println("Error connecting to MinIO: ", err)
 		return nil, err
 	}
+	log.Println("Connected to MinIO!")
 
 	return &AuthenAndPostService{
 		db: db,
