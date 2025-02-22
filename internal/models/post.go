@@ -1,20 +1,24 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // DB Model
 type Post struct {
-	ID               uint
-	UserID           uint
-	ContentText      string
-	ContentImagePath string
-	Visible          bool
-	Comments         []*Comment
-	LikedUsers       []*User
+    gorm.Model
+    ContentText     string    `gorm:"size:500"`
+    ContentImagePath string   `gorm:"size:256"`
+	UserID          uint      `gorm:"not null"`
+    Visible         bool      `gorm:"not null"`
+    Comments        []*Comment `gorm:"foreignKey:PostID"`
+    LikedUsers      []*User   `gorm:"many2many:like;foreignKey:id;joinForeignKey:post_id;References:id;joinReferences:user_id"`
 }
 
 func (Post) TableName() string {
-	return "post"
+    return "post"
 }
 
 // Request Models

@@ -2,8 +2,8 @@ package models
 
 // DB Model
 type Like struct {
-	UserID uint
-	PostID uint
+	UserID uint `gorm:"primaryKey"`
+	PostID uint `gorm:"primaryKey"`
 }
 
 func (Like) TableName() string {

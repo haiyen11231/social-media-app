@@ -1,20 +1,22 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // DB Model
 type User struct {
-	ID          uint `gorm:"primaryKey"`
-	FirstName   string `gorm:"size:50;not null"`
-	LastName    string `gorm:"size:50;not null"`
-	DateOfBirth time.Time `gorm:"not null"`
-	Email string `gorm:"size:50;not null"`
-	Username string `gorm:"size:50;not null;index:idx_username"`
-	HashedPassword string `gorm:"size:50;not null"`
-	Salt string `gorm:"size:20;not null"`
-	Following []*User `gorm:"many2many:following;foreignKey:id;joinForeignKey:user_id;References:id;JoinReferences:follower_id"`
-	Followers []*User `gorm:"many2many:following;foreignKey:id;joinForeignKey:follower_id;References:id;JoinReferences:user_id"`
-	Posts []*Post `gorm:"foreignKey:UserID"`
+	ID            uint      `gorm:"primaryKey"`
+	FirstName     string    `gorm:"size:50;not null"`
+	LastName      string    `gorm:"size:50;not null"`
+	DateOfBirth   time.Time `gorm:"not null"`
+	Email         string    `gorm:"size:50;not null"`
+	Username      string    `gorm:"size:50;not null;index:idx_username"`
+	HashedPassword string   `gorm:"size:256;not null"`
+	Salt          string    `gorm:"size:20;not null"`
+	Following     []*User   `gorm:"many2many:following;foreignKey:id;joinForeignKey:user_id;References:id;JoinReferences:follower_id"`
+	Followers     []*User   `gorm:"many2many:following;foreignKey:id;joinForeignKey:follower_id;References:id;JoinReferences:user_id"`
+	Posts         []*Post   `gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {
