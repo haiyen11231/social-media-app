@@ -151,8 +151,12 @@ services:
       /bin/sh -c "
       sleep 5;
       /usr/bin/mc alias set myminio http://minio:9000 minio miniostorage;
-      /usr/bin/mc mb myminio/social-media-bucket;
-      /usr/bin/mc policy set public myminio/social-media-bucket;
+      if /usr/bin/mc ls myminio/social-media-bucket > /dev/null 2>&1; then
+        echo 'Bucket already exists, skipping creation.';
+      else
+        /usr/bin/mc mb myminio/social-media-bucket;
+        /usr/bin/mc policy set public myminio/social-media-bucket;
+      fi;
       exit 0;"
     networks:
       - intranet
