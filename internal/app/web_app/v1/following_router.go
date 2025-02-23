@@ -8,6 +8,7 @@ import (
 func AddFollowingRouter(r *gin.RouterGroup, svc *service.WebService) {
 	followingRouter := r.Group("/following")
 
+	followingRouter.Use(svc.AuthenticateUser)
 	followingRouter.POST("/:id", )
 	followingRouter.DELETE("/:id", )
 	followingRouter.GET("/:id", )

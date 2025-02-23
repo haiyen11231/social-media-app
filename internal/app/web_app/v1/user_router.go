@@ -10,7 +10,8 @@ func AddUserRouter(r *gin.RouterGroup, svc *service.WebService) {
 	
 	userRouter.POST("/", )
 	userRouter.POST("login", )
-	userRouter.PUT("/", )
 	userRouter.POST("authen", )
 	userRouter.POST("refresh-token", )
+	userRouter.Use(svc.AuthenticateUser)
+	userRouter.PUT("/", )
 }

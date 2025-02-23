@@ -157,41 +157,41 @@ services:
     networks:
       - intranet
 
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    ports:
-      - "9092:9092"
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    healthcheck:
-      test:
-        ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - intranet
-    hostname: kafka
-    restart: always
+  # kafka:
+  #   image: confluentinc/cp-kafka:latest
+  #   environment:
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #   ports:
+  #     - "9092:9092"
+  #   depends_on:
+  #     zookeeper:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test:
+  #       ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
+  #     timeout: 20s
+  #     retries: 10
+  #   networks:
+  #     - intranet
+  #   hostname: kafka
+  #   restart: always
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    healthcheck:
-      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
-      timeout: 10s
-      retries: 5
-    networks:
-      - intranet
-    hostname: zookeeper
-    restart: always
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:latest
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   ports:
+  #     - "2181:2181"
+  #   healthcheck:
+  #     test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+  #     timeout: 10s
+  #     retries: 5
+  #   networks:
+  #     - intranet
+  #   hostname: zookeeper
+  #   restart: always
 
 volumes:
   mysql_data:

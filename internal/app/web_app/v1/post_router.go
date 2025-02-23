@@ -8,6 +8,7 @@ import (
 func AddPostRouter(r *gin.RouterGroup, svc *service.WebService) {
 	postRouter := r.Group("/posts")
 	
+	postRouter.Use(svc.AuthenticateUser)
 	postRouter.POST("/", )
 	postRouter.GET("/:id", )
 	postRouter.PUT("/:id", )

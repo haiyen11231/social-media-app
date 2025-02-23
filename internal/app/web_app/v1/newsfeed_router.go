@@ -8,5 +8,6 @@ import (
 func AddNewsfeedRouter(r *gin.RouterGroup, svc *service.WebService) {
 	newsfeedRouter := r.Group("/newsfeed")
 	
+	newsfeedRouter.Use(svc.AuthenticateUser)
 	newsfeedRouter.GET("/", )
 }
