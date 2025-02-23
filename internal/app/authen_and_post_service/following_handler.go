@@ -53,7 +53,7 @@ func (s *AuthenAndPostService) FollowUser (ctx context.Context, request *authen_
 			return nil, fmt.Errorf("failed to add into Following: %w", err)
 		}
 
-		if err := s.db.WithContext(ctx).Model(&followingUser).Association("Follower").Append(&user); err != nil {
+		if err := s.db.WithContext(ctx).Model(&followingUser).Association("Followers").Append(&user); err != nil {
 			return nil, fmt.Errorf("failed to add into Follower: %w", err)
 		}
 	}
@@ -93,7 +93,7 @@ func (s *AuthenAndPostService) UnfollowUser (ctx context.Context, request *authe
 			return nil, fmt.Errorf("failed to remove from Following: %w", err)
 		}
 
-		if err := s.db.WithContext(ctx).Model(&followingUser).Association("Follower").Delete(&user); err != nil {
+		if err := s.db.WithContext(ctx).Model(&followingUser).Association("Followers").Delete(&user); err != nil {
 			return nil, fmt.Errorf("failed to remove from Follower: %w", err)
 		}
 	}
@@ -110,6 +110,7 @@ func (s *AuthenAndPostService) GetFollowerList (ctx context.Context, request *au
 	if err := s.db.WithContext(ctx).Preload("Followers").First(&user, request.UserId).Error; err != nil {
         return nil, fmt.Errorf("failed to fetch user: %w", err)
     }
+	
 	var followerList []*authen_and_post.GetFollowerListResponse_FollowerInfo
 	for _, follower := range user.Followers {
 		followerList = append(followerList, &authen_and_post.GetFollowerListResponse_FollowerInfo{
