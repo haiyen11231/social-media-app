@@ -55,6 +55,9 @@ func (s *AuthenAndPostService) CreatePost(ctx context.Context, request *authen_a
 		return nil, fmt.Errorf("failed to create post: %w", err)
 	}
 
+	// TODO
+	// defer triggerGenNewsfeed(post.UserId)
+
 	return &authen_and_post.CreatePostResponse{
 		Message: "Post created successfully",
 		PostId: uint64(post.ID),
@@ -176,6 +179,8 @@ func (s *AuthenAndPostService) EditPost (ctx context.Context, request *authen_an
     cacheKey := fmt.Sprintf("post:%d", request.PostId)
     s.rdb.Del(ctx, cacheKey)
 
+	// TODO defer triggerGenNewsfeed(curPost.UserId)
+	
 	return &authen_and_post.EditPostResponse{Message: "Post edited successfully"}, nil
 }
 

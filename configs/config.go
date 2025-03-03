@@ -3,6 +3,7 @@ package configs
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -34,6 +35,8 @@ func loadAppConfigs(path string) (*appConfigs, error) {
 	if err := yaml.Unmarshal(fileContent, config); err != nil {
 		return nil, fmt.Errorf("Failed to unmarshal config file (path: %s): %s", path, err)
 	}
+
+	log.Println(config)
 
 	return config, nil
 } 

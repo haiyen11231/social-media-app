@@ -1,4 +1,4 @@
-FROM golang:1.22.2 AS builder
+FROM golang:1.24.0-alpine3.21 AS builder
 
 WORKDIR /app
 
@@ -14,6 +14,7 @@ CMD ["/app/newsfeed_service.linux"]
 
 FROM builder AS test_env
 RUN cp /app/configs/files/test.yml /app/config.yml
+EXPOSE 8002
 CMD ["/app/newsfeed_service.linux"]
 
 FROM builder AS live_env

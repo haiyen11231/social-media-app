@@ -2,19 +2,18 @@ version: "3.8"
 
 services:
   nginx:
-    image: nginx:alpine
+    build: ./nginx
     container_name: nginx_proxy
     ports:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      web:
-        condition: service_healthy # Wait until web is healthy
-      authen_and_post:
-        condition: service_healthy
-      newsfeed:
-        condition: service_healthy
+      - web
+      - authen_and_post_1
+      - authen_and_post_2
+      - newsfeed_1
+      - newsfeed_2
     networks:
       - intranet
     restart: unless-stopped
@@ -25,30 +24,25 @@ services:
       dockerfile: cmd/web_app/Dockerfile
       target: test_env
     image: web_app
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
     depends_on:
-      authen_and_post:
-        condition: service_healthy
-      newsfeed:
-        condition: service_healthy
+      - authen_and_post_1
+      - authen_and_post_2
+      - newsfeed_1
+      - newsfeed_2
     networks:
       - intranet
     hostname: webapp
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      retries: 5
 
-  authen_and_post:
+  authen_and_post_1:
     build:
       context: .
       dockerfile: cmd/authen_and_post_service/Dockerfile
       target: test_env
     image: authen_and_post_service
-    expose:
-      - "8001"
+    ports:
+      - "8001:8001"
     depends_on:
       mysql:
         condition: service_healthy
@@ -58,38 +52,64 @@ services:
         condition: service_healthy
     networks:
       - intranet
-    hostname: aap
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 10s
-      retries: 5
+    hostname: aap-1
 
-  newsfeed:
+  authen_and_post_2:
+    build:
+      context: .
+      dockerfile: cmd/authen_and_post_service/Dockerfile
+      target: test_env
+    image: authen_and_post_service
+    ports:
+      - "8003:8001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - intranet
+    hostname: aap-2
+
+  newsfeed_1:
     build:
       context: .
       dockerfile: cmd/newsfeed_service/Dockerfile
       target: test_env
     image: newsfeed_service
-    expose:
-      - "8002"
+    ports:
+      - "8002:8002"
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
-      # kafka:
-      #   condition: service_healthy
       minio:
         condition: service_healthy
     networks:
       - intranet
-    hostname: nfs
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 10s
-      retries: 5
+    hostname: nfs-1
+
+  newsfeed_2:
+    build:
+      context: .
+      dockerfile: cmd/newsfeed_service/Dockerfile
+      target: test_env
+    image: newsfeed_service
+    ports:
+      - "8004:8002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - intranet
+    hostname: nfs-2
 
   mysql:
     image: mysql:latest
@@ -125,14 +145,14 @@ services:
   minio:
     image: minio/minio:latest
     environment:
-      MINIO_ROOT_USER: minio #Access Key
-      MINIO_ROOT_PASSWORD: miniostorage #Secret Key
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: miniostorage
     ports:
-      - "9000:9000" # MinIO API Port
-      - "9001:9001" # MinIO Admin Console Port
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
-    command: ["server", "/data", "--console-address", ":9001"] # Enable Admin Console
+    command: ["server", "/data", "--console-address", ":9001"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       timeout: 20s
@@ -149,7 +169,7 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      sleep 5;
+      sleep 60;
       /usr/bin/mc alias set myminio http://minio:9000 minio miniostorage;
       if /usr/bin/mc ls myminio/social-media-bucket > /dev/null 2>&1; then
         echo 'Bucket already exists, skipping creation.';
@@ -161,46 +181,222 @@ services:
     networks:
       - intranet
 
-  # kafka:
-  #   image: confluentinc/cp-kafka:latest
-  #   environment:
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #   ports:
-  #     - "9092:9092"
-  #   depends_on:
-  #     zookeeper:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test:
-  #       ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
-  #     timeout: 20s
-  #     retries: 10
-  #   networks:
-  #     - intranet
-  #   hostname: kafka
-  #   restart: always
-
-  # zookeeper:
-  #   image: confluentinc/cp-zookeeper:latest
-  #   environment:
-  #     ZOOKEEPER_CLIENT_PORT: 2181
-  #     ZOOKEEPER_TICK_TIME: 2000
-  #   ports:
-  #     - "2181:2181"
-  #   healthcheck:
-  #     test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
-  #     timeout: 10s
-  #     retries: 5
-  #   networks:
-  #     - intranet
-  #   hostname: zookeeper
-  #   restart: always
-
 volumes:
   mysql_data:
   minio_data:
 
 networks:
   intranet: {}
-  default: {}
+# --------------------
+# version: "3.8"
+
+# services:
+#   nginx:
+#     image: nginx:alpine
+#     container_name: nginx_proxy
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#     depends_on:
+#       web:
+#         condition: service_healthy # Wait until web is healthy
+#       authen_and_post:
+#         condition: service_healthy
+#       newsfeed:
+#         condition: service_healthy
+#     networks:
+#       - intranet
+#     restart: unless-stopped
+
+#   web:
+#     build:
+#       context: .
+#       dockerfile: cmd/web_app/Dockerfile
+#       target: test_env
+#     image: web_app
+#     expose:
+#       - "8000"
+#     depends_on:
+#       authen_and_post:
+#         condition: service_healthy
+#       newsfeed:
+#         condition: service_healthy
+#     networks:
+#       - intranet
+#     hostname: webapp
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+#       interval: 30s
+#       retries: 10
+#       timeout: 10s
+#       start_period: 20s
+
+#   authen_and_post:
+#     build:
+#       context: .
+#       dockerfile: cmd/authen_and_post_service/Dockerfile
+#       target: test_env
+#     image: authen_and_post_service
+#     expose:
+#       - "8001"
+#     depends_on:
+#       mysql:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+#       minio:
+#         condition: service_healthy
+#     networks:
+#       - intranet
+#     hostname: aap
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+#       interval: 30s
+#       retries: 10
+#       timeout: 10s
+#       start_period: 20s
+
+#   newsfeed:
+#     build:
+#       context: .
+#       dockerfile: cmd/newsfeed_service/Dockerfile
+#       target: test_env
+#     image: newsfeed_service
+#     expose:
+#       - "8002"
+#     depends_on:
+#       mysql:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+#       # kafka:
+#       #   condition: service_healthy
+#       minio:
+#         condition: service_healthy
+#     networks:
+#       - intranet
+#     hostname: nfs
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+#       interval: 30s
+#       retries: 10
+#       timeout: 10s
+#       start_period: 20s
+
+#   mysql:
+#     image: mysql:latest
+#     environment:
+#       MYSQL_ROOT_PASSWORD: mysql-db
+#       MYSQL_DATABASE: social_media_app_db
+#     ports:
+#       - "3307:3306"
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+#     healthcheck:
+#       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#       timeout: 20s
+#       retries: 10
+#     networks:
+#       - intranet
+#     hostname: mysql
+#     restart: always
+
+#   redis:
+#     image: redis:latest
+#     expose:
+#       - "6379"
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       timeout: 5s
+#       retries: 3
+#     networks:
+#       - intranet
+#     hostname: redis
+#     restart: unless-stopped
+
+#   minio:
+#     image: minio/minio:latest
+#     environment:
+#       MINIO_ROOT_USER: minio #Access Key
+#       MINIO_ROOT_PASSWORD: miniostorage #Secret Key
+#     ports:
+#       - "9000:9000" # MinIO API Port
+#       - "9001:9001" # MinIO Admin Console Port
+#     volumes:
+#       - minio_data:/data
+#     command: ["server", "/data", "--console-address", ":9001"] # Enable Admin Console
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+#       timeout: 20s
+#       retries: 10
+#     networks:
+#       - intranet
+#     hostname: minio
+#     restart: always
+
+#   create_minio_bucket:
+#     image: minio/mc:latest
+#     depends_on:
+#       minio:
+#         condition: service_healthy
+#     entrypoint: >
+#       /bin/sh -c "
+#       sleep 30;
+#       /usr/bin/mc alias set myminio http://minio:9000 minio miniostorage;
+#       if /usr/bin/mc ls myminio/social-media-bucket > /dev/null 2>&1; then
+#         echo 'Bucket already exists, skipping creation.';
+#       else
+#         /usr/bin/mc mb myminio/social-media-bucket;
+#         /usr/bin/mc policy set public myminio/social-media-bucket;
+#       fi;
+#       exit 0;"
+#     networks:
+#       - intranet
+
+#   # kafka:
+#   #   image: confluentinc/cp-kafka:latest
+#   #   environment:
+#   #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+#   #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#   #   ports:
+#   #     - "9092:9092"
+#   #   depends_on:
+#   #     zookeeper:
+#   #       condition: service_healthy
+#   #   healthcheck:
+#   #     test:
+#   #       ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
+#   #     timeout: 20s
+#   #     retries: 10
+#   #   networks:
+#   #     - intranet
+#   #   hostname: kafka
+#   #   restart: always
+
+#   # zookeeper:
+#   #   image: confluentinc/cp-zookeeper:latest
+#   #   environment:
+#   #     ZOOKEEPER_CLIENT_PORT: 2181
+#   #     ZOOKEEPER_TICK_TIME: 2000
+#   #   ports:
+#   #     - "2181:2181"
+#   #   healthcheck:
+#   #     test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+#   #     timeout: 10s
+#   #     retries: 5
+#   #   networks:
+#   #     - intranet
+#   #   hostname: zookeeper
+#   #   restart: always
+
+# volumes:
+#   mysql_data:
+#   minio_data:
+
+# networks:
+#   intranet: {}
+#   default: {}
