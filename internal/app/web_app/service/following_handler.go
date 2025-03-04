@@ -18,7 +18,7 @@ func (svc *WebService) FollowUser(ctx *gin.Context) {
 	}
 
 	response, err := svc.authenAndPostClient.FollowUser(ctx, &authen_and_post.FollowUserRequest{
-		UserId: userId,
+		UserId:      userId,
 		FollowingId: uint64(followingId),
 	})
 	if err != nil {
@@ -38,7 +38,7 @@ func (svc *WebService) UnfollowUser(ctx *gin.Context) {
 	}
 
 	response, err := svc.authenAndPostClient.UnfollowUser(ctx, &authen_and_post.UnfollowUserRequest{
-		UserId: userId,
+		UserId:      userId,
 		FollowingId: uint64(followingId),
 	})
 	if err != nil {

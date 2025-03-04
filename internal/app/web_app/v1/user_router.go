@@ -8,10 +8,10 @@ import (
 func AddUserRouter(r *gin.RouterGroup, svc *service.WebService) {
 	userRouter := r.Group("/users")
 	
-	userRouter.POST("/", )
-	userRouter.POST("login", )
-	userRouter.POST("authen", )
-	userRouter.POST("refresh-token", )
+	userRouter.POST("/", svc.SignUp)
+	userRouter.POST("/login", svc.LogIn)
+	userRouter.POST("/authen", svc.AuthenticateUser)
+	userRouter.POST("/refresh-token", svc.RefreshToken)
 	userRouter.Use(svc.AuthenticateUser)
-	userRouter.PUT("/", )
+	userRouter.PUT("/", svc.EditUser)
 }

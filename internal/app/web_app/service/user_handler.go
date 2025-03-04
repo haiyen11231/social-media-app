@@ -1,9 +1,9 @@
 package service
 
 import (
+	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/haiyen11231/social-media-app.git/internal/grpc/pb/authen_and_post"
@@ -18,24 +18,23 @@ func (svc *WebService) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	dob, err := time.Parse("2006-01-02", jsonRequest.DoB)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &models.MessageResponse{Message: err.Error()})
-		return
-	}
-
+	log.Println("Sending request to Sign Up")
 	response, err := svc.authenAndPostClient.SignUp(ctx, &authen_and_post.SignUpRequest{
 		FirstName: jsonRequest.FirstName,
-		LastName: jsonRequest.LastName,
-		Dob: timestamppb.New(dob),
-		Email: jsonRequest.Email,
-		Username: jsonRequest.Username,
-		Password: jsonRequest.Password,
+		LastName:  jsonRequest.LastName,
+		Dob:       timestamppb.New(jsonRequest.DoB),
+		Email:     jsonRequest.Email,
+		Username:  jsonRequest.Username,
+		Password:  jsonRequest.Password,
 	})
+
+	log.Println("Received response from Sign Up")
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, &models.MessageResponse{Message: err.Error()})
 		return
 	}
+
 
 	ctx.JSON(http.StatusOK, response)
 }
@@ -57,7 +56,7 @@ func (svc *WebService) LogIn(ctx *gin.Context) {
 	}
 
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("refresh_token", response.RefreshToken, 60*60*24, "/","", true, true)
+	ctx.SetCookie("refresh_token", response.RefreshToken, 60*60*24, "/", "", true, true)
 	ctx.JSON(http.StatusOK, response)
 }
 
@@ -81,14 +80,8 @@ func (svc *WebService) EditUser(ctx *gin.Context) {
 	}
 
 	var dob *timestamppb.Timestamp
-	if jsonRequest.DoB != "" {
-		parsedDoB, err := time.Parse("2006-01-02", jsonRequest.DoB)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, &models.MessageResponse{Message: err.Error()})
-			return
-		}
-
-		dob = timestamppb.New(parsedDoB)
+	if !jsonRequest.DoB.IsZero() {
+		dob = timestamppb.New(jsonRequest.DoB)
 	}
 
 	var password *string
@@ -96,13 +89,12 @@ func (svc *WebService) EditUser(ctx *gin.Context) {
 		password = &jsonRequest.Password
 	}
 
-
 	response, err := svc.authenAndPostClient.EditUser(ctx, &authen_and_post.EditUserRequest{
-		UserId: userId,
+		UserId:    userId,
 		FirstName: firstName,
-		LastName: lastName,
-		Dob: dob,
-		Password: password,
+		LastName:  lastName,
+		Dob:       dob,
+		Password:  password,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, &models.MessageResponse{Message: err.Error()})

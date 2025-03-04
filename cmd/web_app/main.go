@@ -14,14 +14,14 @@ var path = flag.String("cfg", "/app/configs/files/test.yml", "path to config fil
 
 func main() {
 	flag.Parse()
+
 	cfg, err := configs.GetWebappConfig(*path)
 	fmt.Println(cfg)
 	if err != nil {
 		log.Fatalf("Failed to get config: %s", err)
 	}
 
-	// Add NGINX Host!!!
-	webService, err := service.NewWebService(cfg.NginxHost)
+	webService, err := service.NewWebService(cfg)
 	if err != nil {
 		log.Fatalf("Failed to init server: %s", err)
 	}
@@ -30,5 +30,20 @@ func main() {
 		WebService: *webService,
 		Port:       cfg.Port,
 	}
+
+	log.Printf("Web app started on port %d", cfg.Port)
 	webController.Run()
+	// // Graceful shutdown
+	// ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	// defer stop()
+
+	// go func() {
+	// 	log.Printf("Web app started on port %d", cfg.Port)
+	// 	webController.Run()
+	// }()
+
+	// <-ctx.Done()
+	// log.Println("Shutting down web app...")
+	// // Add any cleanup logic here
+	// log.Println("Web app stopped.")
 }

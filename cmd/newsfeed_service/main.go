@@ -15,6 +15,8 @@ import (
 var path = flag.String("cfg", "/app/configs/files/test.yml", "path to config file of this service")
 
 func main() {
+	flag.Parse()
+
 	cfg, err := configs.GetNewsfeedConfig(*path)
 	if err != nil {
 		log.Fatalf("Failed to get config: %s", err)
@@ -38,4 +40,19 @@ func main() {
 		log.Fatalf("Failed to serve: %s", err)
 	}
 
+// 	// Graceful shutdown
+// 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+// 	defer stop()
+
+// 	go func() {
+// 		log.Printf("gRPC NSF Service server started on port %d", cfg.Port)
+// 		if err := nsfServer.Serve(lis); err != nil {
+// 			log.Fatalf("Failed to serve: %s", err)
+// 		}
+// 	}()
+
+// 	<-ctx.Done()
+// 	log.Println("Shutting down gRPC NSF Service server...")
+// 	nsfServer.GracefulStop()
+// 	log.Println("gRPC NSF Service server stopped.")
 }

@@ -22,10 +22,11 @@ import (
 const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func (s *AuthenAndPostService) SignUp(ctx context.Context, request *authen_and_post.SignUpRequest) (*authen_and_post.SignUpResponse, error) {
+	log.Println("Received SignUp request")
 	salt := generateAlphabetSalt(16)
 	hashedPassword, err := hashPassword(request.GetPassword(), salt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	user := models.User{
@@ -38,34 +39,34 @@ func (s *AuthenAndPostService) SignUp(ctx context.Context, request *authen_and_p
 		Salt:           string(salt),
 	}
 
-	s.db.Create(&user)
 	if err := s.db.Create(&user).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
+
 	return &authen_and_post.SignUpResponse{Message: "User created successfully"}, nil
 }
 
 func (s *AuthenAndPostService) LogIn(ctx context.Context, request *authen_and_post.LogInRequest) (*authen_and_post.LogInResponse, error) {
 	// Check Redis cache first
     cacheKey := fmt.Sprintf("user:%s", request.GetUsername())
-    cachedUser, err := s.rdb.Get(ctx, cacheKey).Result()
+	cachedUser, err := s.rdb.Get(ctx, cacheKey).Result()
     if err == nil {
         // Cache hit: unmarshal cached user data
         var user models.User
-        if err := json.Unmarshal([]byte(cachedUser), &user); err == nil {
-            log.Println("User data retrieved from cache")
-            return s.generateLoginResponse(ctx, &user)
-        }
+		if err := json.Unmarshal([]byte(cachedUser), &user); err == nil {
+			log.Println("User data retrieved from cache")
+			return s.generateLoginResponse(ctx, &user)
+		}
     }
 
 	// Cache miss: fetch from database
     var user models.User
-    result := s.db.Where(&models.User{Username: request.GetUsername()}).First(&user)
-    if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-        return &authen_and_post.LogInResponse{Message: "User not found"}, nil
-    } else if result.Error != nil {
-        return nil, result.Error
-    }
+	result := s.db.Where(&models.User{Username: request.GetUsername()}).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return &authen_and_post.LogInResponse{Message: "User not found"}, nil
+	} else if result.Error != nil {
+		return nil, fmt.Errorf("failed to fetch user: %w", result.Error)
+	}
 
 	passwordWithSalt := []byte(request.Password + user.Salt)
 	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), passwordWithSalt); err != nil {
@@ -74,40 +75,38 @@ func (s *AuthenAndPostService) LogIn(ctx context.Context, request *authen_and_po
 
 	// Cache the user data in Redis
     userJSON, err := json.Marshal(user)
-    if err == nil {
-        if err := s.rdb.Set(ctx, cacheKey, userJSON, 5*time.Minute).Err(); err != nil {
-            log.Println("Failed to cache user data:", err)
-        }
-    }
+	if err == nil {
+		if err := s.rdb.Set(ctx, cacheKey, userJSON, 5*time.Minute).Err(); err != nil {
+			log.Println("Failed to cache user data:", err)
+		}
+	}
 
 	return s.generateLoginResponse(ctx, &user)
 }
 
 func (s *AuthenAndPostService) generateLoginResponse(ctx context.Context, user *models.User) (*authen_and_post.LogInResponse, error) {
     accessToken, err := GenerateToken(uint64(user.ID), 15*time.Minute)
-    if err != nil {
-        log.Println("Failed to generate access token:", err.Error())
-        return nil, err
-    }
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate access token: %w", err)
+	}
 
-    refreshToken, err := GenerateToken(uint64(user.ID), 24*time.Hour)
-    if err != nil {
-        log.Println("Failed to generate refresh token:", err.Error())
-        return nil, err
-    }
+	refreshToken, err := GenerateToken(uint64(user.ID), 24*time.Hour)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
+	}
 
     // Store refresh token in Redis
     refreshTokenKey := fmt.Sprintf("refresh_token:%d", user.ID)
-    if err := s.rdb.Set(ctx, refreshTokenKey, refreshToken, 24*time.Hour).Err(); err != nil {
-        log.Println("Failed to store refresh token in Redis:", err)
-    }
+	if err := s.rdb.Set(ctx, refreshTokenKey, refreshToken, 24*time.Hour).Err(); err != nil {
+		log.Println("Failed to store refresh token in Redis:", err)
+	}
 
-    return &authen_and_post.LogInResponse{
-        UserId:       uint64(user.ID),
-        Message:      "Log in successful",
-        AccessToken:  accessToken,
-        RefreshToken: refreshToken,
-    }, nil
+	return &authen_and_post.LogInResponse{
+		UserId:       uint64(user.ID),
+		Message:      "Log in successful",
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (s *AuthenAndPostService) EditUser(ctx context.Context, request *authen_and_post.EditUserRequest) (*authen_and_post.EditUserResponse, error) {
@@ -133,7 +132,7 @@ func (s *AuthenAndPostService) EditUser(ctx context.Context, request *authen_and
 		salt := generateAlphabetSalt(16)
 		hashPassword, err := hashPassword(request.GetPassword(), salt)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to hash password: %w", err)
 		}
 
 		user.HashedPassword = hashPassword
@@ -155,42 +154,40 @@ func (s *AuthenAndPostService) EditUser(ctx context.Context, request *authen_and
 
 func (s *AuthenAndPostService) AuthenticateUser (ctx context.Context, request *authen_and_post.AuthenticateUserRequest) (*authen_and_post.AuthenticateUserResponse, error) {
 	if request.Token == "" {
-		return &authen_and_post.AuthenticateUserResponse{IsValid: false, Message: "Token is required"}, errors.New("Token is required")
+		return &authen_and_post.AuthenticateUserResponse{IsValid: false, Message: "Token is required"}, errors.New("token is required")
 	}
 
 	parsedId, err := ParseToken(request.Token, os.Getenv("JWT_SECRET"))
 	if err != nil {
-		log.Println("Failed to parse token:", err.Error())
-		return &authen_and_post.AuthenticateUserResponse{IsValid: false, Message: err.Error()}, err
+		return &authen_and_post.AuthenticateUserResponse{IsValid: false, Message: err.Error()}, fmt.Errorf("failed to parse token: %w", err)
 	}
 	log.Printf("Extracted claims ID: %v", parsedId)
 
 	// Check Redis cache first
     cacheKey := fmt.Sprintf("user:%d", parsedId)
-    cachedUser, err := s.rdb.Get(ctx, cacheKey).Result()
+	cachedUser, err := s.rdb.Get(ctx, cacheKey).Result()
     if err == nil {
         // Cache hit: unmarshal cached user data
         var user models.User
-        if err := json.Unmarshal([]byte(cachedUser), &user); err == nil {
-            log.Println("User data retrieved from cache")
-            return &authen_and_post.AuthenticateUserResponse{IsValid: true, Message: "Authenticated!", UserId: uint64(user.ID)}, nil
-        }
+		if err := json.Unmarshal([]byte(cachedUser), &user); err == nil {
+			log.Println("User data retrieved from cache")
+			return &authen_and_post.AuthenticateUserResponse{IsValid: true, Message: "Authenticated!", UserId: uint64(user.ID)}, nil
+		}
     }
 
     // Cache miss: fetch from database
 	user := &models.User{}
 	if err = s.db.Model(&models.User{}).Where("id = ?", parsedId).First(user).Error; err != nil {
-		log.Println("Failed to get users:", err.Error())
-		return &authen_and_post.AuthenticateUserResponse{IsValid: false, Message: "Invalid Credentials!"}, errors.New("invalid credentials")
+		return &authen_and_post.AuthenticateUserResponse{IsValid: false, Message: "Invalid Credentials!"}, fmt.Errorf("failed to fetch user: %w", err)
 	}
 
 	// Cache the user data in Redis
     userJSON, err := json.Marshal(user)
-    if err == nil {
-        if err := s.rdb.Set(ctx, cacheKey, userJSON, 5*time.Minute).Err(); err != nil {
-            log.Println("Failed to cache user data:", err)
-        }
-    }
+	if err == nil {
+		if err := s.rdb.Set(ctx, cacheKey, userJSON, 5*time.Minute).Err(); err != nil {
+			log.Println("Failed to cache user data:", err)
+		}
+	}
 
 	log.Printf("User found with ID: %v", user.ID)
 	return &authen_and_post.AuthenticateUserResponse{IsValid: true, Message: "Authenticated!", UserId: uint64(user.ID)}, nil
@@ -274,9 +271,9 @@ func GenerateToken(userId uint64, expiry time.Duration) (string, error) {
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
-func getKey(userID uint64) string {
-	return "user_refresh_token:" + fmt.Sprint(userID)
-}
+// func getKey(userID uint64) string {
+// 	return "user_refresh_token:" + fmt.Sprint(userID)
+// }
 
 func ParseToken(tokenString, secret string) (int64, error) {
 	log.Println("Token:", tokenString)

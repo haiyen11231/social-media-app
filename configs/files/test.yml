@@ -39,6 +39,12 @@ webapp_config:
   port: 8000
   nginx_host: "nginx:80"
   authen_and_post:
-    hosts: ["aap:8001"]
+    hosts: ["nginx:80/auth"] # Update to go through Nginx
   newsfeed:
-    hosts: ["nfs:8002"]
+    hosts: ["nginx:80/newsfeed"] # Update to go through Nginx
+
+
+  # authen_and_post:
+  #   hosts: ["aap-1:8001", "aap-2:8001"]  # Updated to match docker-compose.yml
+  # newsfeed:
+  #   hosts: ["nfs-1:8002", "nfs-2:8002"]  # Updated to match docker-compose.yml

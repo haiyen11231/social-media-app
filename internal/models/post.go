@@ -8,13 +8,13 @@ import (
 
 // DB Model
 type Post struct {
-    gorm.Model
-    ContentText     string    `gorm:"size:500"`
-    ContentImagePath string   `gorm:"size:256"`
-	UserID          uint      `gorm:"not null"`
-    Visible         bool      `gorm:"not null"`
-    Comments        []*Comment `gorm:"foreignKey:PostID"`
-    LikedUsers      []*User   `gorm:"many2many:like;foreignKey:id;joinForeignKey:post_id;References:id;joinReferences:user_id"`
+	gorm.Model
+	ContentText     string    `gorm:"size:500"`       // Content text of the post
+	ContentImagePath string   `gorm:"size:256"`       // Path to the image in MinIO
+	UserID          uint      `gorm:"not null"`       // ID of the user who created the post
+	Visible         bool      `gorm:"not null"`       // Visibility of the post
+	Comments        []*Comment `gorm:"foreignKey:PostID"` // Comments on the post
+	LikedUsers      []*User   `gorm:"many2many:like;foreignKey:id;joinForeignKey:post_id;References:id;joinReferences:user_id"` // Users who liked the post
 }
 
 func (Post) TableName() string {

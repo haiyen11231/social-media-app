@@ -18,10 +18,10 @@ func (svc *WebService) CreatePost(ctx *gin.Context) {
 	}
 
 	response, err := svc.authenAndPostClient.CreatePost(ctx, &authen_and_post.CreatePostRequest{
-		UserId: userId,
-		ContentText: jsonRequest.ContentText,
+		UserId:           userId,
+		ContentText:      jsonRequest.ContentText,
 		ContentImagePath: jsonRequest.ContentImagePath,
-		Visible: jsonRequest.Visible,
+		Visible:          jsonRequest.Visible,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, &models.MessageResponse{Message: err.Error()})
@@ -38,7 +38,7 @@ func (svc *WebService) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	reponse, err := svc.authenAndPostClient.GetPost(ctx, &authen_and_post.GetPostRequest{
+	response, err := svc.authenAndPostClient.GetPost(ctx, &authen_and_post.GetPostRequest{
 		PostId: uint64(postId),
 	})
 	if err != nil {
@@ -47,12 +47,12 @@ func (svc *WebService) GetPost(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, models.PostDetailResponse{
-		PostID: uint(reponse.Post.PostId),
-		UserID: uint(reponse.Post.UserId),
-		ContentText: reponse.Post.ContentText,
-		ContentImagePath: reponse.Post.ContentImagePath,
-		Visible: reponse.Post.Visible,
-		CreatedAt: reponse.Post.CreatedAt.AsTime(),
+		PostID:           uint(response.Post.PostId),
+		UserID:           uint(response.Post.UserId),
+		ContentText:      response.Post.ContentText,
+		ContentImagePath: response.Post.ContentImagePath,
+		Visible:          response.Post.Visible,
+		CreatedAt:        response.Post.CreatedAt.AsTime(),
 	})
 }
 
@@ -80,17 +80,17 @@ func (svc *WebService) EditPost(ctx *gin.Context) {
 		contentImagePath = jsonRequest.ContentImagePath
 	}
 
-	var visible *bool 
+	var visible *bool
 	if jsonRequest.Visible != nil {
 		visible = jsonRequest.Visible
 	}
 
 	response, err := svc.authenAndPostClient.EditPost(ctx, &authen_and_post.EditPostRequest{
-		PostId: uint64(postId),
-		UserId: userId,
-		ContentText: contentText,
+		PostId:           uint64(postId),
+		UserId:           userId,
+		ContentText:      contentText,
 		ContentImagePath: contentImagePath,
-		Visible: visible,
+		Visible:          visible,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, &models.MessageResponse{Message: err.Error()})
@@ -135,8 +135,8 @@ func (svc *WebService) CreateComment(ctx *gin.Context) {
 	}
 
 	response, err := svc.authenAndPostClient.CreateComment(ctx, &authen_and_post.CreateCommentRequest{
-		UserId: userId,
-		PostId: uint64(postId),
+		UserId:      userId,
+		PostId:      uint64(postId),
 		ContentText: jsonRequest.ContentText,
 	})
 	if err != nil {

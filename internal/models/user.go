@@ -30,21 +30,21 @@ type LogInRequest struct {
 }
 
 type SignUpRequest struct {
-	FirstName string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	DoB string `json:"dob"`
-	Email string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	DoB       time.Time `json:"dob"` 
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
 }
 
 type EditUserRequest struct {
-	FirstName string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	DoB string `json:"dob"`
-	Email string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	DoB       time.Time `json:"dob"` 
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
 }
 
 // Response Models

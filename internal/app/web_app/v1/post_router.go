@@ -7,13 +7,13 @@ import (
 
 func AddPostRouter(r *gin.RouterGroup, svc *service.WebService) {
 	postRouter := r.Group("/posts")
-	
-	postRouter.Use(svc.AuthenticateUser)
-	postRouter.POST("/", )
-	postRouter.GET("/:id", )
-	postRouter.PUT("/:id", )
-	postRouter.DELETE("/:id", )
 
-	postRouter.POST("/:id/comments", )
-	postRouter.POST("/:id/likes", )
+	postRouter.Use(svc.AuthenticateUser)
+	postRouter.POST("/", svc.CreatePost)
+	postRouter.GET("/:id", svc.GetPost)
+	postRouter.PUT("/:id", svc.EditPost)
+	postRouter.DELETE("/:id", svc.DeletePost)
+
+	postRouter.POST("/:id/comments", svc.CreateComment)
+	postRouter.POST("/:id/likes", svc.LikePost)
 }
